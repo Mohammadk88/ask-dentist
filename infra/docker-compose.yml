@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: askdentist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql%40M88E22K
+    ports: ["5432:5432"]
+    volumes: [dbdata:/var/lib/postgresql/data]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  soketi:
+    image: quay.io/soketi/soketi:1
+    environment:
+      SOKETI_DEBUG: "1"
+      SOKETI_DEFAULT_APP_ID: "ask"
+      SOKETI_DEFAULT_APP_KEY: "askkey"
+      SOKETI_DEFAULT_APP_SECRET: "asksecret"
+      SOKETI_METRICS_SERVER_PORT: "9601"
+    ports: ["6001:6001","9601:9601"]
+
+  mailhog:
+    image: mailhog/mailhog
+    ports: ["8025:8025","1025:1025"]
+
+volumes:
+  dbdata:
