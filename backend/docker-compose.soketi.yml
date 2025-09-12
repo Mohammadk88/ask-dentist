@@ -1,0 +1,27 @@
+# Soketi WebSocket Server Configuration
+# Use this for development with Docker Compose
+
+services:
+  soketi:
+    image: 'quay.io/soketi/soketi:1.6-16-alpine'
+    environment:
+      SOKETI_DEBUG: '1'
+      SOKETI_METRICS_SERVER_PORT: '9601'
+      SOKETI_DEFAULT_APP_ID: 'ask-dentist'
+      SOKETI_DEFAULT_APP_KEY: 'ask-dentist-key'
+      SOKETI_DEFAULT_APP_SECRET: 'ask-dentist-secret'
+      SOKETI_DEFAULT_APP_MAX_CONNS: '100'
+      SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES: 'true'
+      SOKETI_DEFAULT_APP_ENABLED: 'true'
+      SOKETI_DEFAULT_APP_MAX_BACKEND_EVENTS_PER_SEC: '100'
+      SOKETI_DEFAULT_APP_MAX_CLIENT_EVENTS_PER_SEC: '60'
+      SOKETI_DEFAULT_APP_MAX_READ_REQ_PER_SEC: '100'
+    ports:
+      - '6001:6001'
+      - '9601:9601'
+    networks:
+      - ask-dentist
+
+networks:
+  ask-dentist:
+    driver: bridge

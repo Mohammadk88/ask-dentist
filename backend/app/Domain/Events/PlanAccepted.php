@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Domain\Events;
+
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class PlanAccepted
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public readonly string $treatmentPlanId
+    ) {}
+}

@@ -1,0 +1,1756 @@
+openapi: 3.1.0
+info:
+  title: Ask.Dentist MVP API
+  description: |
+    A comprehensive dental practice management platform API connecting patients with dental professionals.
+
+    ## Internationalization (i18n)
+
+    This API supports multilingual content through JSON-based internationalization:
+
+    - **Text Storage**: All user-facing text is stored in JSON format to support 20+ languages
+    - **Language Headers**: Use `Accept-Language` header to specify preferred language
+    - **RTL Support**: API responses include RTL (Right-to-Left) indicators for Arabic, Hebrew, and other RTL languages
+    - **Fallback**: English is used as fallback when requested language is unavailable
+
+    ### Language Code Format
+    Use ISO 639-1 language codes with optional country codes:
+    - `en` - English (default)
+    - `ar` - Arabic (RTL)
+    - `he` - Hebrew (RTL)
+    - `es` - Spanish
+    - `fr` - French
+    - `de` - German
+    - `ar-SA` - Arabic (Saudi Arabia)
+    - `en-US` - English (United States)
+
+    ### RTL Language Support
+    Responses for RTL languages include `text_direction: "rtl"` in metadata.
+
+  version: 1.0.0
+  contact:
+    name: Ask.Dentist API Support
+    email: api@ask.dentist
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.ask.dentist/v1
+    description: Production server
+  - url: https://staging-api.ask.dentist/v1
+    description: Staging server
+  - url: http://localhost:8080/api/v1
+    description: Development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Register a new patient or doctor account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - user_type
+                - first_name
+                - last_name
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "patient@example.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "SecurePass123!"
+                password_confirmation:
+                  type: string
+                  example: "SecurePass123!"
+                user_type:
+                  type: string
+                  enum: [patient, doctor]
+                  example: "patient"
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+                phone:
+                  type: string
+                  example: "+1234567890"
+                date_of_birth:
+                  type: string
+                  format: date
+                  example: "1990-01-15"
+                gender:
+                  type: string
+                  enum: [male, female, other]
+                  example: "male"
+                license_number:
+                  type: string
+                  description: "Required for doctors"
+                  example: "DDS123456"
+                specialization:
+                  type: string
+                  description: "Required for doctors"
+                  example: "General Dentistry"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "patient@example.com"
+                password:
+                  type: string
+                  example: "SecurePass123!"
+                remember_me:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Revoke current access token
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+
+  # Users
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # Roles
+  /roles:
+    get:
+      tags:
+        - Roles
+      summary: List roles
+      responses:
+        '200':
+          description: Roles retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Role'
+
+  # Clinics
+  /clinics:
+    get:
+      tags:
+        - Clinics
+      summary: List clinics
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Clinics retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Clinic'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags:
+        - Clinics
+      summary: Create new clinic
+      description: Create a new clinic (doctors only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClinicRequest'
+      responses:
+        '201':
+          description: Clinic created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Clinic'
+
+  /clinics/{id}:
+    get:
+      tags:
+        - Clinics
+      summary: Get clinic details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Clinic found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Clinic'
+
+  # Doctors
+  /doctors:
+    get:
+      tags:
+        - Doctors
+      summary: List doctors
+      parameters:
+        - name: specialization
+          in: query
+          schema:
+            type: string
+        - name: available_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: city
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Doctors retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Doctor'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+  /doctors/{id}:
+    get:
+      tags:
+        - Doctors
+      summary: Get doctor details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Doctor found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+
+  # Patients
+  /patients:
+    get:
+      tags:
+        - Patients
+      summary: List patients (doctors only)
+      responses:
+        '200':
+          description: Patients retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Patient'
+
+  /patients/{id}:
+    get:
+      tags:
+        - Patients
+      summary: Get patient details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Patient found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+
+  # Treatment Requests (Core Feature)
+  /treatment-requests:
+    get:
+      tags:
+        - Treatment Requests
+      summary: List treatment requests
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, assigned, in_progress, completed, cancelled]
+        - name: patient_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: doctor_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Treatment requests retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TreatmentRequest'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+
+    post:
+      tags:
+        - Treatment Requests
+      summary: Create treatment request
+      description: Patient creates a new treatment request
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - treatment_type
+                - description
+              properties:
+                treatment_type:
+                  type: string
+                  enum: [consultation, cleaning, filling, extraction, orthodontics, surgery, emergency]
+                priority:
+                  type: string
+                  enum: [low, medium, high, urgent]
+                  default: medium
+                description:
+                  type: string
+                  minLength: 10
+                  example: "I have severe tooth pain in my upper left molar"
+                symptoms:
+                  type: array
+                  items:
+                    type: string
+                  example: ["pain", "swelling", "bleeding"]
+                pain_level:
+                  type: integer
+                  minimum: 0
+                  maximum: 10
+                  example: 7
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: "Medical images, X-rays, etc."
+      responses:
+        '201':
+          description: Treatment request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentRequest'
+
+  /treatment-requests/{id}:
+    get:
+      tags:
+        - Treatment Requests
+      summary: Get treatment request details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Treatment request found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentRequest'
+
+  /treatment-requests/{id}/dispatch:
+    post:
+      tags:
+        - Treatment Requests
+      summary: Assign dentist to treatment request
+      description: Auto-assign or manually assign a dentist to handle the treatment request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dentist_id:
+                  type: string
+                  format: uuid
+                  description: "Optional: specific dentist to assign. If not provided, system will auto-assign"
+                assignment_note:
+                  type: string
+                  description: "Note for the assignment"
+      responses:
+        '200':
+          description: Dentist assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dentist assigned successfully"
+                  data:
+                    $ref: '#/components/schemas/TreatmentRequest'
+
+  # Treatment Plans
+  /treatment-requests/{id}/plans:
+    get:
+      tags:
+        - Treatment Plans
+      summary: Get treatment plans for request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Treatment plans retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TreatmentPlan'
+
+    post:
+      tags:
+        - Treatment Plans
+      summary: Create treatment plan
+      description: Doctor creates a treatment plan for a request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTreatmentPlanRequest'
+      responses:
+        '201':
+          description: Treatment plan created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentPlan'
+
+  /treatment-plans/{id}/accept:
+    post:
+      tags:
+        - Treatment Plans
+      summary: Accept treatment plan
+      description: Patient accepts a treatment plan (only one can be accepted per request)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Treatment plan accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentPlan'
+
+  /treatment-plans/{id}/reject:
+    post:
+      tags:
+        - Treatment Plans
+      summary: Reject treatment plan
+      description: Patient rejects a treatment plan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: "Reason for rejection"
+      responses:
+        '200':
+          description: Treatment plan rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreatmentPlan'
+
+  # Services
+  /services:
+    get:
+      tags:
+        - Services
+      summary: List dental services
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [preventive, restorative, cosmetic, surgical, orthodontic, pediatric]
+      responses:
+        '200':
+          description: Services retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Service'
+
+  # Price Lists
+  /clinics/{id}/price-lists:
+    get:
+      tags:
+        - Price Lists
+      summary: Get clinic price lists
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Price lists retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PriceList'
+
+  # Appointments
+  /appointments:
+    get:
+      tags:
+        - Appointments
+      summary: List appointments
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [scheduled, confirmed, in_progress, completed, cancelled]
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Appointments retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment'
+
+    post:
+      tags:
+        - Appointments
+      summary: Create appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+      responses:
+        '201':
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  /appointments/{id}:
+    get:
+      tags:
+        - Appointments
+      summary: Get appointment details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Appointment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+
+  # Messages
+  /messages:
+    get:
+      tags:
+        - Messages
+      summary: List messages
+      parameters:
+        - name: conversation_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: treatment_request_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Messages retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+
+    post:
+      tags:
+        - Messages
+      summary: Send message
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - conversation_id
+                - content
+              properties:
+                conversation_id:
+                  type: string
+                  format: uuid
+                content:
+                  type: string
+                message_type:
+                  type: string
+                  enum: [text, image, file, audio]
+                  default: text
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  # Files
+  /files:
+    post:
+      tags:
+        - Files
+      summary: Upload file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                file_type:
+                  type: string
+                  enum: [medical_image, xray, document, photo]
+                description:
+                  type: string
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+
+  /files/{id}:
+    get:
+      tags:
+        - Files
+      summary: Get file details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: File found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+
+  # Reviews
+  /reviews:
+    get:
+      tags:
+        - Reviews
+      summary: List reviews
+      parameters:
+        - name: doctor_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: patient_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reviews retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+
+    post:
+      tags:
+        - Reviews
+      summary: Create review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201':
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Authentication Schemas
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+        refresh_token:
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          example: 3600
+
+    # Core Entities
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        user_type:
+          type: string
+          enum: [patient, doctor, admin]
+          example: "patient"
+        status:
+          type: string
+          enum: [pending, active, suspended, inactive]
+          example: "active"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        phone:
+          type: string
+          example: "+1234567890"
+        avatar_url:
+          type: string
+          format: uri
+          example: "https://storage.example.com/avatars/user.jpg"
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Doctor:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            license_number:
+              type: string
+              example: "DDS123456"
+            specialization:
+              type: string
+              example: "General Dentistry"
+            years_of_experience:
+              type: integer
+              example: 10
+            clinic:
+              $ref: '#/components/schemas/Clinic'
+            rating:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 5
+              example: 4.8
+            reviews_count:
+              type: integer
+              example: 156
+
+    Patient:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            date_of_birth:
+              type: string
+              format: date
+              example: "1990-01-15"
+            gender:
+              type: string
+              enum: [male, female, other]
+              example: "male"
+            medical_history:
+              type: array
+              items:
+                type: string
+            allergies:
+              type: array
+              items:
+                type: string
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "doctor"
+        display_name:
+          type: string
+          example: "Doctor"
+        description:
+          type: string
+
+    Clinic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Downtown Dental Care"
+        description:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postal_code:
+              type: string
+            country:
+              type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+        reviews_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TreatmentRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patient_id:
+          type: string
+          format: uuid
+        assigned_doctor_id:
+          type: string
+          format: uuid
+          nullable: true
+        treatment_type:
+          type: string
+          enum: [consultation, cleaning, filling, extraction, orthodontics, surgery, emergency]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        status:
+          type: string
+          enum: [pending, assigned, in_progress, completed, cancelled]
+        description:
+          type: string
+        symptoms:
+          type: array
+          items:
+            type: string
+        pain_level:
+          type: integer
+          minimum: 0
+          maximum: 10
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+        patient:
+          $ref: '#/components/schemas/Patient'
+        assigned_doctor:
+          $ref: '#/components/schemas/Doctor'
+          nullable: true
+        treatment_plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentPlan'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TreatmentPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        treatment_request_id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "Root Canal Treatment Plan"
+        description:
+          type: string
+        status:
+          type: string
+          enum: [draft, submitted, accepted, rejected, completed]
+        total_cost:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: "Amount in cents"
+            currency:
+              type: string
+        estimated_duration:
+          type: string
+          description: "Duration in ISO 8601 format"
+          example: "P2W"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentPlanItem'
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentStage'
+        notes:
+          type: string
+        accepted_at:
+          type: string
+          format: date-time
+          nullable: true
+        rejected_at:
+          type: string
+          format: date-time
+          nullable: true
+        rejection_reason:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TreatmentPlanItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        service:
+          $ref: '#/components/schemas/Service'
+        quantity:
+          type: integer
+          minimum: 1
+        unit_price:
+          type: object
+          properties:
+            amount:
+              type: integer
+            currency:
+              type: string
+        total_price:
+          type: object
+          properties:
+            amount:
+              type: integer
+            currency:
+              type: string
+        notes:
+          type: string
+
+    TreatmentStage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "Initial Consultation"
+        description:
+          type: string
+        order:
+          type: integer
+        estimated_duration:
+          type: string
+          example: "PT1H"
+        status:
+          type: string
+          enum: [pending, in_progress, completed, skipped]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreatmentPlanItem'
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Dental Cleaning"
+        description:
+          type: string
+        category:
+          type: string
+          enum: [preventive, restorative, cosmetic, surgical, orthodontic, pediatric]
+        code:
+          type: string
+          example: "D1110"
+        duration:
+          type: string
+          description: "Duration in ISO 8601 format"
+          example: "PT1H"
+        created_at:
+          type: string
+          format: date-time
+
+    PriceList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clinic_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Standard Pricing 2024"
+        currency:
+          type: string
+          example: "USD"
+        is_active:
+          type: boolean
+        prices:
+          type: array
+          items:
+            type: object
+            properties:
+              service_id:
+                type: string
+                format: uuid
+              price:
+                type: integer
+                description: "Price in cents"
+              discount_percentage:
+                type: number
+                format: float
+                minimum: 0
+                maximum: 100
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patient_id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        clinic_id:
+          type: string
+          format: uuid
+        treatment_request_id:
+          type: string
+          format: uuid
+          nullable: true
+        appointment_type:
+          type: string
+          enum: [consultation, treatment, follow_up, emergency]
+        status:
+          type: string
+          enum: [scheduled, confirmed, in_progress, completed, cancelled, no_show]
+        scheduled_at:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: "Duration in minutes"
+        notes:
+          type: string
+        patient:
+          $ref: '#/components/schemas/Patient'
+        doctor:
+          $ref: '#/components/schemas/Doctor'
+        clinic:
+          $ref: '#/components/schemas/Clinic'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        sender_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        message_type:
+          type: string
+          enum: [text, image, file, audio, system]
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+        is_read:
+          type: boolean
+        sender:
+          $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        original_name:
+          type: string
+          example: "xray_image.jpg"
+        file_path:
+          type: string
+        file_size:
+          type: integer
+          description: "File size in bytes"
+        mime_type:
+          type: string
+          example: "image/jpeg"
+        file_type:
+          type: string
+          enum: [medical_image, xray, document, photo, audio, video]
+        description:
+          type: string
+        download_url:
+          type: string
+          format: uri
+        uploaded_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        patient_id:
+          type: string
+          format: uuid
+        doctor_id:
+          type: string
+          format: uuid
+        appointment_id:
+          type: string
+          format: uuid
+          nullable: true
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        title:
+          type: string
+        comment:
+          type: string
+        patient:
+          $ref: '#/components/schemas/Patient'
+        doctor:
+          $ref: '#/components/schemas/Doctor'
+        created_at:
+          type: string
+          format: date-time
+
+    # Request Schemas
+    CreateClinicRequest:
+      type: object
+      required:
+        - name
+        - address
+        - phone
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: object
+          required:
+            - street
+            - city
+            - state
+            - postal_code
+            - country
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postal_code:
+              type: string
+            country:
+              type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+
+    CreateTreatmentPlanRequest:
+      type: object
+      required:
+        - title
+        - description
+        - items
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - service_id
+              - quantity
+              - unit_price
+            properties:
+              service_id:
+                type: string
+                format: uuid
+              quantity:
+                type: integer
+                minimum: 1
+              unit_price:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+                  currency:
+                    type: string
+              notes:
+                type: string
+        stages:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              order:
+                type: integer
+              estimated_duration:
+                type: string
+        notes:
+          type: string
+        estimated_duration:
+          type: string
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - doctor_id
+        - scheduled_at
+        - appointment_type
+      properties:
+        doctor_id:
+          type: string
+          format: uuid
+        treatment_request_id:
+          type: string
+          format: uuid
+        appointment_type:
+          type: string
+          enum: [consultation, treatment, follow_up, emergency]
+        scheduled_at:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: "Duration in minutes"
+          default: 60
+        notes:
+          type: string
+        service_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    CreateReviewRequest:
+      type: object
+      required:
+        - doctor_id
+        - rating
+      properties:
+        doctor_id:
+          type: string
+          format: uuid
+        appointment_id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        title:
+          type: string
+        comment:
+          type: string
+
+    # Utility Schemas
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 10
+        per_page:
+          type: integer
+          example: 15
+        total:
+          type: integer
+          example: 150
+        from:
+          type: integer
+          example: 1
+        to:
+          type: integer
+          example: 15
+
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "An error occurred"
+        error_code:
+          type: string
+          example: "INVALID_CREDENTIALS"
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The given data was invalid"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email: ["The email field is required."]
+            password: ["The password must be at least 8 characters."]
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User management operations
+  - name: Roles
+    description: User roles and permissions
+  - name: Clinics
+    description: Dental clinic management
+  - name: Doctors
+    description: Doctor profiles and availability
+  - name: Patients
+    description: Patient profiles and medical history
+  - name: Treatment Requests
+    description: Treatment request management (Core feature)
+  - name: Treatment Plans
+    description: Treatment plan creation and management
+  - name: Services
+    description: Dental service catalog
+  - name: Price Lists
+    description: Clinic pricing management
+  - name: Appointments
+    description: Appointment scheduling and management
+  - name: Messages
+    description: In-app messaging system
+  - name: Files
+    description: File upload and management
+  - name: Reviews
+    description: Doctor and clinic reviews

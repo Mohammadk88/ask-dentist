@@ -1,0 +1,232 @@
+name: Build Android APKs
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  release:
+    types: [ published ]
+
+jobs:
+  build-doctor-apk:
+    name: Build Doctor App APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        channel: 'stable'
+
+    - name: Get Flutter dependencies
+      working-directory: ./apps/doctor
+      run: flutter pub get
+
+    - name: Run tests
+      working-directory: ./apps/doctor
+      run: flutter test
+
+    - name: Build debug APK
+      working-directory: ./apps/doctor
+      run: flutter build apk --debug --build-name=${{ github.ref_name }} --build-number=${{ github.run_number }}
+
+    - name: Upload Doctor APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: doctor-app-debug-${{ github.ref_name }}
+        path: apps/doctor/build/app/outputs/flutter-apk/app-debug.apk
+
+    - name: Upload APK to release
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: apps/doctor/build/app/outputs/flutter-apk/app-debug.apk
+        asset_name: ask-dentist-doctor-${{ github.ref_name }}-debug.apk
+        asset_content_type: application/vnd.android.package-archive
+
+  build-patient-apk:
+    name: Build Patient App APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        channel: 'stable'
+
+    - name: Get Flutter dependencies
+      working-directory: ./apps/patient
+      run: flutter pub get
+
+    - name: Run tests
+      working-directory: ./apps/patient
+      run: flutter test
+
+    - name: Build debug APK
+      working-directory: ./apps/patient
+      run: flutter build apk --debug --build-name=${{ github.ref_name }} --build-number=${{ github.run_number }}
+
+    - name: Upload Patient APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: patient-app-debug-${{ github.ref_name }}
+        path: apps/patient/build/app/outputs/flutter-apk/app-debug.apk
+
+    - name: Upload APK to release
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: apps/patient/build/app/outputs/flutter-apk/app-debug.apk
+        asset_name: ask-dentist-patient-${{ github.ref_name }}-debug.apk
+        asset_content_type: application/vnd.android.package-archive
+
+  build-release-apks:
+    name: Build Release APKs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.x'
+        channel: 'stable'
+
+    # Doctor App Release Build
+    - name: Get Doctor App dependencies
+      working-directory: ./apps/doctor
+      run: flutter pub get
+
+    - name: Build Doctor release APK
+      working-directory: ./apps/doctor
+      run: flutter build apk --release --build-name=${{ github.ref_name }} --build-number=${{ github.run_number }}
+
+    - name: Upload Doctor Release APK to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: apps/doctor/build/app/outputs/flutter-apk/app-release.apk
+        asset_name: ask-dentist-doctor-${{ github.ref_name }}-release.apk
+        asset_content_type: application/vnd.android.package-archive
+
+    # Patient App Release Build
+    - name: Get Patient App dependencies
+      working-directory: ./apps/patient
+      run: flutter pub get
+
+    - name: Build Patient release APK
+      working-directory: ./apps/patient
+      run: flutter build apk --release --build-name=${{ github.ref_name }} --build-number=${{ github.run_number }}
+
+    - name: Upload Patient Release APK to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: apps/patient/build/app/outputs/flutter-apk/app-release.apk
+        asset_name: ask-dentist-patient-${{ github.ref_name }}-release.apk
+        asset_content_type: application/vnd.android.package-archive
+
+  create-release-notes:
+    name: Update Release Notes
+    runs-on: ubuntu-latest
+    needs: [build-doctor-apk, build-patient-apk]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Update release with APK info
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: release } = await github.rest.repos.getRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: context.payload.release.id
+          });
+
+          const apkInfo = `
+
+          ## 📱 Mobile Apps
+
+          ### Android APKs Available:
+          - **Doctor App (Debug)**: \`ask-dentist-doctor-${{ github.ref_name }}-debug.apk\`
+          - **Doctor App (Release)**: \`ask-dentist-doctor-${{ github.ref_name }}-release.apk\`
+          - **Patient App (Debug)**: \`ask-dentist-patient-${{ github.ref_name }}-debug.apk\`
+          - **Patient App (Release)**: \`ask-dentist-patient-${{ github.ref_name }}-release.apk\`
+
+          ### Installation Instructions:
+          1. Download the appropriate APK for your role (Doctor or Patient)
+          2. Enable "Install from Unknown Sources" in your Android settings
+          3. Install the APK file
+          4. Launch the app and sign in with your credentials
+
+          ### Build Information:
+          - **Build Number**: ${{ github.run_number }}
+          - **Flutter Version**: 3.24.x
+          - **Target SDK**: Android API 34
+          - **Minimum SDK**: Android API 21 (Android 5.0)
+
+          `;
+
+          await github.rest.repos.updateRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: context.payload.release.id,
+            body: release.body + apkInfo
+          });
+
+  notify-release:
+    name: Notify Release Complete
+    runs-on: ubuntu-latest
+    needs: [build-doctor-apk, build-patient-apk, create-release-notes]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Send notification
+      run: |
+        echo "🎉 Release ${{ github.ref_name }} complete!"
+        echo "✅ Doctor App APK built and uploaded"
+        echo "✅ Patient App APK built and uploaded"
+        echo "✅ Release notes updated"
+        echo "📦 Assets available at: ${{ github.event.release.html_url }}"

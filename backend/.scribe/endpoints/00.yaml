@@ -1,0 +1,676 @@
+name: Authentication
+description: |-
+
+  Authentication endpoints for user registration, login, and token management
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/register/patient
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Register a new patient'
+      description: 'Create a new patient account with basic profile information and medical consent'
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: "The patient's full name."
+        required: true
+        example: 'John Doe'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      email:
+        name: email
+        description: "The patient's email address."
+        required: true
+        example: john@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'Password (min 8 characters).'
+        required: true
+        example: SecurePass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      phone:
+        name: phone
+        description: 'Phone number.'
+        required: true
+        example: '+1234567890'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      date_of_birth:
+        name: date_of_birth
+        description: 'Date of birth (YYYY-MM-DD).'
+        required: true
+        example: '1990-05-15'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      gender:
+        name: gender
+        description: Gender.
+        required: true
+        example: male
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      emergency_contact_name:
+        name: emergency_contact_name
+        description: 'Emergency contact name.'
+        required: true
+        example: 'Jane Doe'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      emergency_contact_phone:
+        name: emergency_contact_phone
+        description: 'Emergency contact phone.'
+        required: true
+        example: '+1987654321'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      consent_treatment:
+        name: consent_treatment
+        description: 'Treatment consent.'
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      consent_data_sharing:
+        name: consent_data_sharing
+        description: 'Data sharing consent.'
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      medical_history:
+        name: medical_history
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      allergies:
+        name: allergies
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      current_medications:
+        name: current_medications
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      dental_history:
+        name: dental_history
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      insurance_provider:
+        name: insurance_provider
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      insurance_number:
+        name: insurance_number
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      password_confirmation:
+        name: password_confirmation
+        description: 'Password confirmation.'
+        required: true
+        example: SecurePass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 'John Doe'
+      email: john@example.com
+      password: SecurePass123
+      phone: '+1234567890'
+      date_of_birth: '1990-05-15'
+      gender: male
+      emergency_contact_name: 'Jane Doe'
+      emergency_contact_phone: '+1987654321'
+      consent_treatment: true
+      consent_data_sharing: true
+      medical_history: architecto
+      allergies: architecto
+      current_medications: architecto
+      dental_history: architecto
+      insurance_provider: 'n'
+      insurance_number: g
+      password_confirmation: SecurePass123
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "message": "Patient registered successfully",
+            "user": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com",
+              "user_type": "patient"
+            },
+            "token": {
+              "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+              "token_type": "Bearer",
+              "expires_in": 86400
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "message": "Validation failed",
+            "errors": {
+              "email": ["The email has already been taken."]
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/register/doctor
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Register a new doctor'
+      description: 'Create a new doctor account with professional credentials and specialization'
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: "The doctor's full name."
+        required: true
+        example: 'Dr. Jane Smith'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      email:
+        name: email
+        description: "The doctor's email address."
+        required: true
+        example: jane@clinic.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'Password (min 8 characters).'
+        required: true
+        example: SecurePass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      phone:
+        name: phone
+        description: 'Phone number.'
+        required: true
+        example: '+1234567890'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      specialization_id:
+        name: specialization_id
+        description: 'Specialization ID.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      license_number:
+        name: license_number
+        description: 'Medical license number.'
+        required: true
+        example: MD123456
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      years_of_experience:
+        name: years_of_experience
+        description: 'Years of experience.'
+        required: true
+        example: 10
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      education:
+        name: education
+        description: 'Education background.'
+        required: true
+        example: 'Harvard Medical School'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      certifications:
+        name: certifications
+        description: 'optional Professional certifications.'
+        required: false
+        example: 'Board Certified'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      bio:
+        name: bio
+        description: 'optional Professional biography.'
+        required: false
+        example: 'Experienced dentist specializing in...'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      consultation_fee:
+        name: consultation_fee
+        description: 'optional Consultation fee.'
+        required: false
+        example: '150.00'
+        type: decimal
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      password_confirmation:
+        name: password_confirmation
+        description: 'Password confirmation.'
+        required: true
+        example: SecurePass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 'Dr. Jane Smith'
+      email: jane@clinic.com
+      password: SecurePass123
+      phone: '+1234567890'
+      specialization_id: 1
+      license_number: MD123456
+      years_of_experience: 10
+      education: 'Harvard Medical School'
+      certifications: 'Board Certified'
+      bio: 'Experienced dentist specializing in...'
+      consultation_fee: '150.00'
+      password_confirmation: SecurePass123
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "message": "Doctor registered successfully. Account pending verification.",
+            "user": {
+              "id": 2,
+              "name": "Dr. Jane Smith",
+              "email": "jane@clinic.com",
+              "user_type": "doctor"
+            },
+            "token": {
+              "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+              "token_type": "Bearer",
+              "expires_in": 86400
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/login
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'User login'
+      description: 'Authenticate user and return access token'
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        name: email
+        description: 'User email address.'
+        required: true
+        example: john@example.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'User password.'
+        required: true
+        example: SecurePass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      remember_me:
+        name: remember_me
+        description: 'optional Remember user session.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      email: john@example.com
+      password: SecurePass123
+      remember_me: true
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Login successful",
+            "user": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com",
+              "user_type": "patient"
+            },
+            "token": {
+              "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+              "token_type": "Bearer",
+              "expires_in": 86400
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 401
+        content: |-
+          {
+            "message": "Invalid credentials"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/logout
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'User logout'
+      description: 'Revoke current access token'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Logout successful"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/auth/profile
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get current user profile'
+      description: "Retrieve authenticated user's profile information"
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "user": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com",
+              "user_type": "patient",
+              "profile": {
+                "date_of_birth": "1990-05-15",
+                "gender": "male"
+              }
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/auth/refresh
+    metadata:
+      groupName: Authentication
+      groupDescription: |-
+
+        Authentication endpoints for user registration, login, and token management
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Refresh access token'
+      description: 'Generate a new access token using refresh token'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "token": {
+              "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...",
+              "token_type": "Bearer",
+              "expires_in": 86400
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

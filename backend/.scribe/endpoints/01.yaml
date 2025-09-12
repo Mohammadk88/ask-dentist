@@ -1,0 +1,551 @@
+name: 'Profile Management'
+description: |-
+
+  User profile management endpoints for patients and doctors
+endpoints:
+  -
+    httpMethods:
+      - PUT
+    uri: api/profile
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update user profile'
+      description: 'Update basic user information'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'optional Full name.'
+        required: false
+        example: 'John Smith'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      phone:
+        name: phone
+        description: 'optional Phone number.'
+        required: false
+        example: '+1234567890'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      current_password:
+        name: current_password
+        description: 'optional Current password (required if changing password).'
+        required: false
+        example: CurrentPass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'optional New password.'
+        required: false
+        example: NewPass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      password_confirmation:
+        name: password_confirmation
+        description: 'optional New password confirmation.'
+        required: false
+        example: NewPass123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: 'John Smith'
+      phone: '+1234567890'
+      current_password: CurrentPass123
+      password: NewPass123
+      password_confirmation: NewPass123
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Profile updated successfully",
+            "user": {
+              "id": 1,
+              "name": "John Smith",
+              "email": "john@example.com",
+              "phone": "+1234567890"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: api/profile/patient
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update patient profile'
+      description: 'Update patient-specific information'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      date_of_birth:
+        name: date_of_birth
+        description: 'optional Date of birth.'
+        required: false
+        example: '1990-05-15'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      gender:
+        name: gender
+        description: 'optional Gender.'
+        required: false
+        example: male
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      emergency_contact_name:
+        name: emergency_contact_name
+        description: 'optional Emergency contact name.'
+        required: false
+        example: 'Jane Doe'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      emergency_contact_phone:
+        name: emergency_contact_phone
+        description: 'optional Emergency contact phone.'
+        required: false
+        example: '+1987654321'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      medical_history:
+        name: medical_history
+        description: 'optional Medical history.'
+        required: false
+        example: 'No significant medical history'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      allergies:
+        name: allergies
+        description: 'optional Known allergies.'
+        required: false
+        example: 'Penicillin allergy'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      current_medications:
+        name: current_medications
+        description: 'optional Current medications.'
+        required: false
+        example: 'Aspirin 81mg daily'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      dental_history:
+        name: dental_history
+        description: 'optional Dental history.'
+        required: false
+        example: 'Regular cleanings, no major procedures'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      insurance_provider:
+        name: insurance_provider
+        description: 'optional Insurance provider.'
+        required: false
+        example: 'Blue Cross Blue Shield'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      insurance_number:
+        name: insurance_number
+        description: 'optional Insurance number.'
+        required: false
+        example: BC123456789
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      date_of_birth: '1990-05-15'
+      gender: male
+      emergency_contact_name: 'Jane Doe'
+      emergency_contact_phone: '+1987654321'
+      medical_history: 'No significant medical history'
+      allergies: 'Penicillin allergy'
+      current_medications: 'Aspirin 81mg daily'
+      dental_history: 'Regular cleanings, no major procedures'
+      insurance_provider: 'Blue Cross Blue Shield'
+      insurance_number: BC123456789
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Patient profile updated successfully",
+            "patient": {
+              "id": 1,
+              "date_of_birth": "1990-05-15",
+              "gender": "male",
+              "medical_history": "Updated medical history"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: api/profile/doctor
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update doctor profile'
+      description: 'Update doctor-specific information'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      specialization_id:
+        name: specialization_id
+        description: 'optional Specialization ID.'
+        required: false
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      years_of_experience:
+        name: years_of_experience
+        description: 'optional Years of experience.'
+        required: false
+        example: 12
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      education:
+        name: education
+        description: 'optional Education background.'
+        required: false
+        example: 'Johns Hopkins School of Medicine'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      certifications:
+        name: certifications
+        description: 'optional Professional certifications.'
+        required: false
+        example: 'Board Certified in Orthodontics'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      bio:
+        name: bio
+        description: 'optional Professional biography.'
+        required: false
+        example: 'Experienced dentist with focus on pediatric care'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      consultation_fee:
+        name: consultation_fee
+        description: 'optional Consultation fee.'
+        required: false
+        example: '175.00'
+        type: decimal
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      is_available:
+        name: is_available
+        description: 'optional Availability status.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      specialization_id: 2
+      years_of_experience: 12
+      education: 'Johns Hopkins School of Medicine'
+      certifications: 'Board Certified in Orthodontics'
+      bio: 'Experienced dentist with focus on pediatric care'
+      consultation_fee: '175.00'
+      is_available: true
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Doctor profile updated successfully",
+            "doctor": {
+              "id": 1,
+              "specialization_id": 2,
+              "years_of_experience": 12,
+              "consultation_fee": "175.00",
+              "is_available": true
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: api/profile/picture
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Delete profile picture'
+      description: 'Remove user profile picture'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Profile picture deleted successfully"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: api/profile/consent
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update patient consent'
+      description: 'Update patient treatment and data sharing consent'
+      authenticated: true
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      consent_treatment:
+        name: consent_treatment
+        description: 'Treatment consent.'
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      consent_data_sharing:
+        name: consent_data_sharing
+        description: 'Data sharing consent.'
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      consent_treatment: true
+      consent_data_sharing: true
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "message": "Consent updated successfully",
+            "consent": {
+              "consent_treatment": true,
+              "consent_data_sharing": true
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/specializations
+    metadata:
+      groupName: 'Profile Management'
+      groupDescription: |-
+
+        User profile management endpoints for patients and doctors
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Get available specializations'
+      description: 'Retrieve list of all active medical specializations'
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "specializations": [
+              {
+                "id": 1,
+                "name": "General Dentistry",
+                "description": "General dental care and procedures",
+                "available_doctors_count": 5
+              }
+            ]
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
