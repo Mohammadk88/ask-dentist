@@ -22,12 +22,12 @@ class RoleMiddleware
         $user = auth()->user();
 
         // Check if user has any of the required roles
-        if (!$user->hasAnyRole($roles)) {
+        if (!in_array($user->role, $roles)) {
             activity('security')
                 ->causedBy($user)
                 ->withProperties([
                     'required_roles' => $roles,
-                    'user_roles' => $user->roles->pluck('name'),
+                    'user_role' => $user->role,
                     'requested_route' => $request->route()?->getName(),
                     'ip_address' => $request->ip(),
                 ])

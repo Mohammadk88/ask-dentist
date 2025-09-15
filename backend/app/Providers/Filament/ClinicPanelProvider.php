@@ -50,7 +50,7 @@ class ClinicPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                'web.role:doctor',
+                'web.role:clinic_manager',
             ]);
     }
 }

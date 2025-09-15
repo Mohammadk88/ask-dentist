@@ -184,7 +184,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // After gate - log denied access attempts (skip in testing)
         Gate::after(function (User $user, string $ability, bool $result) {
-            if (app()->environment() !== 'testing' && !$result) {
+            if (!in_array(app()->environment(), ['testing', 'dusk.local']) && !$result) {
                 activity('security')
                     ->causedBy($user)
                     ->withProperties([

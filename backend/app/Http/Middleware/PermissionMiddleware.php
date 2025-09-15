@@ -23,15 +23,18 @@ class PermissionMiddleware
 
         // Check if user has any of the required permissions
         if (!$user->hasAnyPermission($permissions)) {
-            activity('security')
-                ->causedBy($user)
-                ->withProperties([
-                    'required_permissions' => $permissions,
-                    'user_permissions' => $user->getAllPermissions()->pluck('name'),
-                    'requested_route' => $request->route()?->getName(),
-                    'ip_address' => $request->ip(),
-                ])
-                ->log('Unauthorized permission access attempt');
+            // Skip activity logging in test environments
+            if (!in_array(app()->environment(), ['testing', 'dusk.local'])) {
+                activity('security')
+                    ->causedBy($user)
+                    ->withProperties([
+                        'required_permissions' => $permissions,
+                        'user_permissions' => $user->getAllPermissions()->pluck('name'),
+                        'requested_route' => $request->route()?->getName(),
+                        'ip_address' => $request->ip(),
+                    ])
+                    ->log('Unauthorized permission access attempt');
+            }
 
             return response()->json([
                 'message' => 'Insufficient permissions. Required permissions: ' . implode(', ', $permissions)

@@ -20,18 +20,34 @@ class Consultation extends Model
 
     protected $fillable = [
         'patient_id',
-        'case_type',
-        'message',
-        'images_json',
+        'title',
+        'description',
+        'urgency',
+        'symptoms',
+        'affected_teeth',
+        'photos',
         'status',
+        'preferred_date',
+        'preferred_times',
+        'is_emergency',
+        'notes',
     ];
 
     protected $casts = [
-        'images_json' => 'array',
+        'symptoms' => 'array',
+        'affected_teeth' => 'array',
+        'photos' => 'array',
+        'preferred_times' => 'array',
+        'preferred_date' => 'datetime',
+        'is_emergency' => 'boolean',
     ];
 
     const STATUS_PENDING = 'pending';
-    const STATUS_ASSIGNED = 'assigned';  
+    const STATUS_REVIEWING = 'reviewing';
+    const STATUS_QUOTE_REQUESTED = 'quote_requested';
+    const STATUS_QUOTED = 'quoted';
+    const STATUS_ACCEPTED = 'accepted';
+    const STATUS_SCHEDULED = 'scheduled';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
@@ -115,7 +131,7 @@ class Consultation extends Model
      */
     public function scopeAssigned($query)
     {
-        return $query->where('status', self::STATUS_ASSIGNED);
+        return $query->where('status', self::STATUS_ACCEPTED);
     }
 
     /**
@@ -155,7 +171,7 @@ class Consultation extends Model
      */
     public function isAssigned(): bool
     {
-        return $this->status === self::STATUS_ASSIGNED;
+        return $this->status === self::STATUS_ACCEPTED;
     }
 
     /**

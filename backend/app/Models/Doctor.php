@@ -67,7 +67,7 @@ class Doctor extends Model
      */
     public function consultations()
     {
-        return $this->hasMany(Consultation::class);
+        return $this->belongsToMany(Consultation::class, 'treatment_request_doctors', 'doctor_id', 'treatment_request_id');
     }
 
     /**
@@ -85,7 +85,8 @@ class Doctor extends Model
      */
     public function completedConsultations()
     {
-        return $this->hasMany(Consultation::class)->where('status', 'completed');
+        return $this->belongsToMany(Consultation::class, 'treatment_request_doctors', 'doctor_id', 'treatment_request_id')
+                    ->where('treatment_requests.status', 'completed');
     }
 
     /**
@@ -93,7 +94,8 @@ class Doctor extends Model
      */
     public function activeConsultations()
     {
-        return $this->hasMany(Consultation::class)->whereIn('status', ['assigned', 'in_progress']);
+        return $this->belongsToMany(Consultation::class, 'treatment_request_doctors', 'doctor_id', 'treatment_request_id')
+                    ->whereIn('treatment_requests.status', ['assigned', 'in_progress']);
     }
 
     /**

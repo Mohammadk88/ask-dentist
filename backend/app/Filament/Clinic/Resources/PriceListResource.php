@@ -248,9 +248,18 @@ class PriceListResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        // For now, show all pricing. 
-        // TODO: Filter by user's clinic when user-clinic relationship is established
-        return parent::getEloquentQuery();
+        $query = parent::getEloquentQuery();
+        
+        // For clinic managers, scope to pricing of their clinic
+        if (auth()->user()?->role === 'clinic_manager') {
+            // Get the first clinic for now - in production this should be properly linked
+            $clinic = \App\Models\Clinic::first();
+            if ($clinic) {
+                $query->where('clinic_id', $clinic->id);
+            }
+        }
+        
+        return $query;
     }
 
     public static function getPages(): array
